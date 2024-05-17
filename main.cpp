@@ -9,5 +9,5 @@ int test() {
 int main() {
   test();
   int a, b, c; cin >> a >> b >> c;
-  cout << a + b + c / 0 << endl;
+  cout << a + b + c  << endl;
 }

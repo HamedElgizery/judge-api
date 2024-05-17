@@ -1,5 +1,6 @@
 import subprocess
 import json
+from flask import Flask, jsonify, request
 
 class CompilationError(Exception):
     pass
@@ -24,6 +25,15 @@ def run(exe_name):
         raise(RuntimeError)
     
 
-compile("main.cpp")
-run("main")
+app = Flask(__name__)
+
+
+@app.route('/judge', methods=['POST'])
+def judge_solution():
+    submission = json.loads(request.data)
+    print(submission)
+
+if __name__ == '__main__':
+   app.run(port=5000)
+
 
