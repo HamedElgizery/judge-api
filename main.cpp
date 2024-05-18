@@ -1,13 +1,17 @@
 #include <iostream>
+#include <vector>
 
 using namespace std;
 
 int test() {
   cout << "Yes";
+  return 0;
 }
 
 int main() {
-  test();
-  int a, b, c; cin >> a >> b >> c;
-  cout << a + b + c  << endl;
+  vector<int> v;
+  while (1) {
+    v.push_back(1);
+  }
+  return 0;
 }

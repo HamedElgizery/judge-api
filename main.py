@@ -46,21 +46,12 @@ def measure_memory_usage(pid):
 def run(exe_name):
     with open("input.in", "r") as in_stream:
         with open("out.out", "w+") as out_stream:
-            process = subprocess.Popen(
+            process = subprocess.check_call(
                     ["./" + exe_name],
                     stdin=in_stream,
                     stdout=out_stream,
+                    timeout = 3
             )
-            while process.poll() is None:  # Check if the subprocess is still running
-                memory_usage = measure_memory_usage(process.pid)
-                if memory_usage > 256000000:
-                    process.terminate()
-                    raise(MLE)
-                if memory_usage is not None:
-                    print(f"Memory Usage: {memory_usage / (1024 * 1024):.2f} MB")
-                else:
-                    print("Could not measure memory usage. Process might have terminated.")
-                time.sleep(1)  # Measure memory usage every second
 
 submission_id = 0
 app = Flask(__name__)
@@ -79,9 +70,11 @@ def judge_solution():
         try:
             run(source_file_name[:-4])
             result["status"] = "SUCCESS"
+        except IOError:
+            result["status"] = "EINTERNAL"
         except RuntimeError:
             result["status"] = "ERUNTIME"
-        except TLE:
+        except TimeoutExpired:
             result["status"] = "TLE"
         except MLE:
             result["status"] = "MLE"
