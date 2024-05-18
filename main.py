@@ -46,21 +46,38 @@ def measure_memory_usage(pid):
 def run(exe_name):
     with open("input.in", "r") as in_stream:
         with open("out.out", "w+") as out_stream:
+            timeoutInSeconds = 1                                      # Our timeout value.
+
+            timeStarted = time.time()                                 # Save start time.
             process = subprocess.Popen(
                     ["./" + exe_name],
                     stdin=in_stream,
                     stdout=out_stream,
+                    shell=True
             )
-            while process.poll() is None:  # Check if the subprocess is still running
-                memory_usage = measure_memory_usage(process.pid)
-                if memory_usage > 256000000:
-                    process.terminate()
-                    raise(MLE)
-                if memory_usage is not None:
-                    print(f"Memory Usage: {memory_usage / (1024 * 1024):.2f} MB")
-                else:
-                    print("Could not measure memory usage. Process might have terminated.")
-                time.sleep(1)  # Measure memory usage every second
+
+            cmdTimer     =  "sleep "+str(timeoutInSeconds)            # Waiting for timeout...
+            cmdKill      =  "kill "+str(process.pid)+" 2>/dev/null"      # And killing process.
+            cmdTimeout   =  cmdTimer+" && "+cmdKill                   # Combine commands above.
+            procTimeout  =  subprocess.Popen(cmdTimeout,shell=True)   # Start timeout process.
+
+            process.communicate()
+            pid = process.pid 
+            timeDelta = time.time() - timeStarted                     # Get execution time.
+            print(measure_memory_usage(pid))
+            print("Finished process in "+str(timeDelta)+" seconds.")  # Output result.
+            if timeDelta > timeoutInSeconds:
+                raise(TLE)
+
+
+            '''
+            process.wait(4);
+            print(f"Memory Usage: {memory_usage / (1024 * 1024):.2f} MB")
+            if memory_usage > 256000000:
+                process.terminate()
+                raise(MLE)
+            return;
+            '''
 
 submission_id = 0
 app = Flask(__name__)
