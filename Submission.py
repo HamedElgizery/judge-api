@@ -1,5 +1,6 @@
 import json
 import subprocess
+from datetime import datetime
 from subprocess import TimeoutExpired
 from JudgeException import *
 from subprocess import TimeoutExpired
@@ -27,6 +28,7 @@ class Submission:
         self.results = []
         self.time_limit_flag = False
         self.memory_limit_flag = False
+        self.compilation_failed = False;
         
 
     def process(self):
@@ -40,8 +42,6 @@ class Submission:
         result["tests_verdicts"] = self.results
         return json.dumps(result)
 
-        
-
 
     def _compile(self):
         self.source_file_name = os.path.join(self.submission_dir, self.submission_dir + ".cpp")
@@ -52,7 +52,7 @@ class Submission:
             print("Compilation Successufl");
         except Exception as e:
             print(e)
-            raise(CompilationError)
+            self.compilation_failed = True;
 
     def _run(self):
         for test in self.test_cases:
@@ -64,20 +64,31 @@ class Submission:
 
 
     def _run_test(self):
+        if compilation_failed:
+            return {
+                    "verdict" : "ECOM",
+                    "run_time" : str(self.time_limit),
+                    "memory_used" : str(self.memory_limit);
+            }
         verdict = "AC"
         #TODO: Calculate time
         #TODO: Calculate memory
         exe_time = 1
-        memory_usage = 20000
+        memory_usage = str(20000)
         try:
             input_file = open(self.input_file_path, "r")
             output_file = open(self.result_file_path, "w")
+
+            start_time = datetime.now()
+
             process = subprocess.check_call(
                     ["./" + self.source_file_name[:-4]],
                     stdin=input_file,
                     stdout=output_file,
                     timeout = self.time_limit 
                     )
+            end_time = datetime.now()
+            exe_time = end_time - start_time
             input_file.close()
             output_file.close()
         except TimeoutExpired:
@@ -94,11 +105,9 @@ class Submission:
                 verdict = "WA"
         return {
                 "verdict" : verdict,
-                "run_time" : exe_time,
+                "run_time" : str(exe_time.total_seconds()),
                 "memory_used" : memory_usage
         }
-
-        
 
 
     def __del__(self):
